@@ -1,0 +1,4 @@
+package org.sid.necform.mapper;
+
+public class EntrepriseMapper {
+}

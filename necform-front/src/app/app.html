@@ -1,0 +1,261 @@
+<style>
+  :host {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+      Helvetica, Arial, sans-serif;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    display: flex;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+  }
+
+  .app-container {
+    display: flex;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    width: 260px;
+    background-color: #1f2937;
+    color: white;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .user-info {
+    margin-top: auto; /* Pousse la section utilisateur vers le bas de la sidebar */
+    padding-top: 1rem;
+    padding-bottom: 8rem; /* Ajoute encore plus d'espace en bas */
+    border-top: 1px solid #374151;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex-shrink: 0; /* Empêche la section d'être réduite */
+  }
+
+  .logout-button {
+    order: 1; /* Affiche le bouton en premier */
+  }
+
+  .user-details {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    order: 2; /* Affiche les détails utilisateur en second */
+    flex-shrink: 0; /* Empêche les détails d'être réduits */
+  }
+
+  .user-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #3b82f6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+
+  .user-text {
+    flex: 1;
+  }
+
+  .user-name {
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .user-email {
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+
+  .logout-button {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    background-color: #ef4444;
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+  }
+
+  .logout-button:hover {
+    background-color: #dc2626;
+  }
+
+  .sidebar-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #374151;
+  }
+
+  .sidebar-header h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: #3b82f6;
+  }
+
+  .sidebar-header p {
+    font-size: 0.875rem;
+    color: #9ca3af;
+    margin: 0.25rem 0 0 0;
+  }
+
+  .nav-links {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: #d1d5db;
+    text-decoration: none;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+    font-weight: 500;
+  }
+
+  .nav-link:hover {
+    background-color: #374151;
+    color: white;
+  }
+
+  .nav-link.active {
+    background-color: #3b82f6;
+    color: white;
+  }
+
+  .nav-link svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .main-content {
+    flex: 1;
+    margin-left: 260px;
+    padding: 0;
+    background-color: #f3f4f6;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: relative;
+    }
+
+    .main-content {
+      margin-left: 0;
+    }
+
+    .nav-links {
+      flex-direction: row;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      flex: 1;
+      min-width: 120px;
+      justify-content: center;
+    }
+  }
+</style>
+
+<div class="app-container">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h1>Necform</h1>
+      <p>Gestion des formations</p>
+    </div>
+    <nav class="nav-links">
+      <a routerLink="/dashboard" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+        <span>Tableau de bord</span>
+      </a>
+      <a routerLink="/demandes" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+        <span>Demandes</span>
+      </a>
+      <a routerLink="/entreprises" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        <span>Entreprises</span>
+      </a>
+      <a routerLink="/formations" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.833 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+        <span>Formations</span>
+      </a>
+      <a routerLink="/sessions" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span>Sessions</span>
+      </a>
+      <a routerLink="/inscriptions" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span>Inscriptions</span>
+      </a>
+      <a routerLink="/utilisateurs" routerLinkActive="active" class="nav-link">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+        </svg>
+        <span>Utilisateurs</span>
+      </a>
+    </nav>
+
+    <!-- Section utilisateur : affiche les informations de l'utilisateur connecté et le bouton de déconnexion -->
+    <div class="user-info">
+      <!-- Bouton de déconnexion -->
+      <!-- Au clic, appelle la méthode logout() du composant -->
+      <button class="logout-button" (click)="logout()">
+        Déconnexion
+      </button>
+
+      <!-- Détails de l'utilisateur : avatar, nom et email -->
+      <div class="user-details">
+        <!-- Avatar de l'utilisateur : cercle avec la première lettre du nom -->
+        <div class="user-avatar">
+          {{ getUserName().charAt(0).toUpperCase() }}
+        </div>
+
+        <!-- Informations textuelles de l'utilisateur -->
+        <div class="user-text">
+          <!-- Nom complet de l'utilisateur -->
+          <div class="user-name">{{ getUserName() }}</div>
+
+          <!-- Email de l'utilisateur -->
+          <div class="user-email">{{ getUserEmail() }}</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <main class="main-content">
+    <router-outlet />
+  </main>
+</div>

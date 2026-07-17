@@ -1,0 +1,87 @@
+package org.sid.necform.service.impl;
+
+import com.necform.dto.request.CreateFormationRequest;
+import com.necform.dto.response.FormationResponse;
+import com.necform.entity.Formation;
+import com.necform.mapper.FormationMapper;
+import com.necform.repository.FormationRepository;
+import com.necform.service.FormationService;
+
+import lombok.RequiredArgsConstructor;
+
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.UUID;
+
+@Service
+@RequiredArgsConstructor
+
+public class FormationServiceImpl
+        implements FormationService {
+
+    private final FormationRepository repository;
+
+    @Override
+    public FormationResponse create(
+            CreateFormationRequest request
+    ){
+
+        Formation formation =
+                FormationMapper.toEntity(
+                        request
+                );
+
+        repository.save(
+                formation
+        );
+
+        return FormationMapper
+                .toResponse(
+                        formation
+                );
+
+    }
+
+    @Override
+    public List<FormationResponse> getAll(){
+
+        return repository
+                .findAll()
+                .stream()
+                .map(
+                        FormationMapper::toResponse
+                )
+                .toList();
+
+    }
+
+    @Override
+    public FormationResponse getById(
+            UUID id
+    ){
+
+        return repository
+                .findById(id)
+
+                .map(
+                        FormationMapper::toResponse
+                )
+
+                .orElseThrow();
+
+    }
+
+    @Override
+    public void delete(
+            UUID id
+    ){
+
+        repository
+                .deleteById(
+                        id
+                );
+
+    }
+
+}

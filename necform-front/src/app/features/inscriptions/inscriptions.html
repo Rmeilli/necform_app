@@ -1,0 +1,84 @@
+<div class="inscriptions-container">
+  <div class="header">
+    <h1>Inscriptions</h1>
+    <button class="btn-primary" (click)="showCreateForm()">+ Nouvelle Inscription</button>
+  </div>
+
+  <div *ngIf="errorMessage" class="error-message">
+    {{ errorMessage }}
+    <button class="close-error" (click)="errorMessage = ''">×</button>
+  </div>
+
+  <div *ngIf="isLoading" class="loading">
+    <div class="spinner"></div>
+    <p>Chargement...</p>
+  </div>
+
+  <div *ngIf="!isLoading" class="table-container">
+    <table class="inscriptions-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Apprenant</th>
+          <th>Formation</th>
+          <th>Statut</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let inscription of inscriptions">
+          <td>{{ inscription.dateInscription | date:'dd/MM/yyyy' }}</td>
+          <td>{{ inscription.apprenantNom }} {{ inscription.apprenantPrenom }}</td>
+          <td>{{ inscription.sessionFormationFormationTitre }}</td>
+          <td>
+            <span class="statut-badge" [ngClass]="getStatutClass(inscription.statut)">
+              {{ getStatutLabel(inscription.statut) }}
+            </span>
+          </td>
+          <td class="actions">
+            <button class="btn-edit" (click)="showEditForm(inscription)">✏️</button>
+            <button class="btn-delete" (click)="deleteInscription(inscription.id)">🗑️</button>
+          </td>
+        </tr>
+        <tr *ngIf="inscriptions.length === 0">
+          <td colspan="5" class="no-data">Aucune inscription trouvée</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div *ngIf="showForm" class="modal-overlay" (click)="closeForm()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>{{ isEditing ? 'Modifier' : 'Nouvelle' }} Inscription</h2>
+        <button class="btn-close" (click)="closeForm()">×</button>
+      </div>
+      <form class="modal-body" (submit)="submitForm()">
+        <div class="form-group">
+          <label>Date d'inscription *</label>
+          <input type="date" [(ngModel)]="formData.dateInscription" name="dateInscription" required>
+        </div>
+        <div class="form-group">
+          <label>ID Session *</label>
+          <input type="text" [(ngModel)]="formData.sessionFormationId" name="sessionFormationId" required placeholder="UUID">
+        </div>
+        <div class="form-group">
+          <label>ID Apprenant *</label>
+          <input type="text" [(ngModel)]="formData.apprenantId" name="apprenantId" required placeholder="UUID">
+        </div>
+        <div class="form-group">
+          <label>Statut *</label>
+          <select [(ngModel)]="formData.statut" name="statut" required>
+            <option [value]="StatutInscription.EN_ATTENTE">En attente</option>
+            <option [value]="StatutInscription.VALIDEE">Validée</option>
+            <option [value]="StatutInscription.ANNULEE">Annulée</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" (click)="closeForm()">Annuler</button>
+          <button type="submit" class="btn-primary">{{ isEditing ? 'Modifier' : 'Créer' }}</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

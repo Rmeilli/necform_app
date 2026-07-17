@@ -1,0 +1,4 @@
+package org.sid.necform.controller;
+
+public class FormationController {
+}

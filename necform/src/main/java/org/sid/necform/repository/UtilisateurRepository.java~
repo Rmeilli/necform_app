@@ -1,0 +1,4 @@
+package org.sid.necform.repository;
+
+public interface UtilisateurRepository {
+}

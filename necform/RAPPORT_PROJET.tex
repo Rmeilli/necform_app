@@ -1,0 +1,263 @@
+\documentclass[a4paper,12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[french]{babel}
+\usepackage{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{enumitem}
+\usepackage{xcolor}
+
+\geometry{margin=2.5cm}
+
+\title{\textbf{Rapport d'avancement - Projet NECFORM}}
+\author{[Votre nom]}
+\date{[Date du jour] \\ Encadrant : [Nom de l'encadrant]}
+
+\begin{document}
+
+\maketitle
+
+\section*{Présentation du projet}
+
+NECFORM est une application web de gestion des formations destinée à faciliter l'organisation et le suivi des formations professionnelles.
+
+L'application permet de :
+\begin{itemize}
+    \item Gérer les utilisateurs (apprenants, formateurs, administrateurs)
+    \item Gérer les entreprises clientes
+    \item Gérer le catalogue de formations
+    \item Planifier et gérer les sessions de formation
+    \item Gérer les inscriptions aux sessions
+    \item Traiter les demandes de nouvelles formations
+    \item Gérer les documents associés
+    \item Visualiser un tableau de bord de synthèse
+\end{itemize}
+
+\section{Fonctionnalités développées}
+
+\subsection{Gestion des utilisateurs}
+\begin{itemize}
+    \item Création, modification et suppression d'utilisateurs
+    \item Gestion des rôles et des profils
+    \item Association aux entreprises
+\end{itemize}
+
+\subsection{Gestion des entreprises}
+\begin{itemize}
+    \item Création et gestion des entreprises clientes
+    \item Association des utilisateurs aux entreprises
+\end{itemize}
+
+\subsection{Gestion des formations}
+\begin{itemize}
+    \item Catalogue de formations avec description
+    \item Création, modification et suppression de formations
+    \item Gestion des types de formations
+\end{itemize}
+
+\subsection{Gestion des sessions}
+\begin{itemize}
+    \item Planification des sessions de formation
+    \item Gestion des dates et lieux
+    \item Suivi des statuts (planifiée, en cours, terminée, annulée)
+\end{itemize}
+
+\subsection{Gestion des inscriptions}
+\begin{itemize}
+    \item Inscription des utilisateurs aux sessions
+    \item Suivi des statuts d'inscription (en attente, confirmée, annulée)
+\end{itemize}
+
+\subsection{Demandes de formation}
+\begin{itemize}
+    \item Système de demande de nouvelles formations
+    \item Workflow de validation des demandes
+    \item Suivi des statuts (en attente, approuvée, refusée)
+\end{itemize}
+
+\subsection{Gestion des documents}
+\begin{itemize}
+    \item Upload et gestion des documents
+    \item Classification par type (contrat, facture, attestation, etc.)
+\end{itemize}
+
+\subsection{Dashboard}
+\begin{itemize}
+    \item Vue synthétique de l'activité
+    \item Statistiques globales
+\end{itemize}
+
+\section{Modèle de données et relations entre entités}
+
+\subsection{Vue d'ensemble des relations}
+
+Le système de gestion des formations repose sur les relations suivantes entre les entités principales :
+
+\begin{verbatim}
+Entreprise ──(1:N)──> DemandeFormation ──(N:1)──> Formation
+                                              │
+                                              │ (1:N)
+                                              ↓
+                                     SessionFormation ──(1:N)──> Inscription
+                                              │                      │
+                                              │ (N:1)                │ (N:1)
+                                              ↓                      ↓
+                                      Utilisateur (formateur)   Utilisateur (apprenant)
+
+Document ──(N:1)──> SessionFormation
+Document ──(N:1)──> Utilisateur
+\end{verbatim}
+
+\subsection{Explication des relations}
+
+\textbf{Entreprise ↔ DemandeFormation}
+\begin{itemize}
+    \item Une entreprise peut faire plusieurs demandes de formation
+    \item Chaque demande est liée à une entreprise cliente
+\end{itemize}
+
+\textbf{Formation ↔ SessionFormation}
+\begin{itemize}
+    \item Une formation peut avoir plusieurs sessions (différentes dates/lieux)
+    \item Chaque session est liée à une formation spécifique
+\end{itemize}
+
+\textbf{SessionFormation ↔ Utilisateur (formateur)}
+\begin{itemize}
+    \item Une session est animée par un formateur (utilisateur de type FORMATEUR)
+    \item Un formateur peut animer plusieurs sessions
+\end{itemize}
+
+\textbf{SessionFormation ↔ Inscription}
+\begin{itemize}
+    \item Une session peut avoir plusieurs inscriptions
+    \item Chaque inscription est liée à une session spécifique
+\end{itemize}
+
+\textbf{Inscription ↔ Utilisateur (apprenant)}
+\begin{itemize}
+    \item Un apprenant (utilisateur de type APPRENANT) peut s'inscrire à plusieurs sessions
+    \item Chaque inscription est liée à un apprenant
+\end{itemize}
+
+\textbf{DemandeFormation ↔ Formation}
+\begin{itemize}
+    \item Une demande concerne une formation existante du catalogue
+    \item Une formation peut faire l'objet de plusieurs demandes
+\end{itemize}
+
+\textbf{Document ↔ SessionFormation / Utilisateur}
+\begin{itemize}
+    \item Un document peut être associé à une session (ex: attestation de présence)
+    \item Un document peut être associé à un utilisateur (ex: contrat)
+\end{itemize}
+
+\subsection{Flux métier principal}
+
+\begin{enumerate}
+    \item \textbf{Demande} : Une entreprise fait une demande pour une formation
+    \item \textbf{Planification} : Une session est créée pour cette formation avec un formateur
+    \item \textbf{Inscription} : Les apprenants s'inscrivent à la session
+    \item \textbf{Réalisation} : La session se déroule (statut passe de PLANIFIEE à EN\_COURS puis TERMINEE)
+    \item \textbf{Documents} : Les documents sont générés (attestations, factures, etc.)
+\end{enumerate}
+
+\section{Sécurité et authentification}
+
+L'application utilise Keycloak pour la gestion de l'authentification et des autorisations :
+\begin{itemize}
+    \item Connexion sécurisée des utilisateurs
+    \item Gestion des rôles et des permissions
+    \item Protection des données sensibles
+\end{itemize}
+
+\begin{center}
+\framebox{\parbox{0.8\textwidth}{\centering \textbf{[EMPLACEMENT SCREENSHOT - Interface Keycloak]} \\ \textit{Insérer ici une capture de l'interface Keycloak montrant la gestion des utilisateurs/rôles}}}
+\end{center}
+
+\section{Documentation de l'API}
+
+Une interface Swagger a été mise en place pour documenter et tester l'API :
+\begin{itemize}
+    \item Documentation interactive de tous les endpoints
+    \item Possibilité de tester les requêtes directement
+    \item Accès via : \url{http://localhost:8080/swagger-ui.html}
+\end{itemize}
+
+\begin{center}
+\framebox{\parbox{0.8\textwidth}{\centering \textbf{[EMPLACEMENT SCREENSHOT - Interface Swagger]} \\ \textit{Insérer ici une capture de l'interface Swagger UI avec les endpoints}}}
+\end{center}
+
+\section{Tests API avec Postman}
+
+Les fonctionnalités ont été testées avec Postman :
+\begin{itemize}
+    \item Collection de requêtes pour chaque module
+    \item Vérification des réponses de l'API
+    \item Tests des différents scénarios
+\end{itemize}
+
+\begin{center}
+\framebox{\parbox{0.8\textwidth}{\centering \textbf{[EMPLACEMENT SCREENSHOT - Postman - Collection de tests]} \\ \textit{Insérer ici une capture de Postman montrant la collection de requêtes}}}
+\end{center}
+
+\begin{center}
+\framebox{\parbox{0.8\textwidth}{\centering \textbf{[EMPLACEMENT SCREENSHOT - Postman - Test d'un endpoint]} \\ \textit{Insérer ici une capture de Postman montrant un test réussi d'un endpoint API}}}
+\end{center}
+
+\section{Infrastructure et Docker}
+
+L'application utilise Docker Compose pour l'orchestration des services :
+\begin{itemize}
+    \item Conteneur PostgreSQL pour la base de données
+    \item Conteneur Keycloak pour l'authentification
+    \item Facilité de déploiement et de reproduction de l'environnement
+\end{itemize}
+
+\begin{center}
+\framebox{\parbox{0.8\textwidth}{\centering \textbf{[EMPLACEMENT SCREENSHOT - Docker Compose]} \\ \textit{Insérer ici une capture des conteneurs Docker en cours d'exécution}}}
+\end{center}
+
+\section{État d'avancement}
+
+\subsection*{Fonctionnalités terminées}
+\begin{itemize}
+    \item Gestion complète des utilisateurs
+    \item Gestion des entreprises
+    \item Gestion des formations et sessions
+    \item Gestion des inscriptions
+    \item Gestion des demandes de formation
+    \item Gestion des documents
+    \item Dashboard de synthèse
+    \item Authentification et sécurité
+    \item Documentation API (Swagger)
+\end{itemize}
+
+\subsection*{En cours}
+\begin{itemize}
+    \item Tests finaux avec Postman
+\end{itemize}
+
+\subsection*{À faire}
+\begin{itemize}
+    \item Frontend, Ai, etc...
+\end{itemize}
+
+\section{Prochaines étapes}
+
+\begin{itemize}
+    \item Finalisation des tests
+    \item Entamer la partie frontend avec Angular
+\end{itemize}
+
+\section*{Annexes}
+
+\subsection*{Accès à l'application}
+
+\begin{itemize}
+    \item \textbf{Interface Swagger} : \url{http://localhost:8080/swagger-ui.html}
+    \item \textbf{Port de l'application} : 8080
+\end{itemize}
+
+\end{document}

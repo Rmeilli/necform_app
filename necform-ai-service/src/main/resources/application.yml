@@ -1,0 +1,23 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: necform-ai-service
+
+  cloud:
+    discovery:
+      enabled: false
+
+ai:
+  provider: huggingface
+  huggingface:
+    api-key: ${HUGGINGFACE_API_KEY}
+    model: mistralai/Mistral-7B-Instruct-v0.3
+    base-url: https://api-inference.huggingface.co
+    timeout: 30s
+
+logging:
+  level:
+    org.sid.necform.ai: DEBUG
+    org.springframework.web.reactive: DEBUG

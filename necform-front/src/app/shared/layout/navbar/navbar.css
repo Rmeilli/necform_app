@@ -1,0 +1,154 @@
+.navbar {
+  width: 260px;
+  height: 100vh;
+  background: linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%);
+  color: white;
+  position: fixed;
+  left: 0;
+  top: 0;
+  transition: width 0.3s ease;
+  z-index: 1000;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.navbar.collapsed {
+  width: 80px;
+}
+
+.navbar-header {
+  padding: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: white;
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.navbar-brand svg {
+  flex-shrink: 0;
+}
+
+.brand-text {
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.3s ease;
+}
+
+.toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: white;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.navbar-menu {
+  list-style: none;
+  padding: 1rem 0;
+  margin: 0;
+}
+
+.menu-item {
+  margin: 0.25rem 0.75rem;
+}
+
+.menu-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  border-radius: 0.5rem;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.menu-link:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.menu-link.active {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  font-weight: 500;
+}
+
+.menu-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.menu-text {
+  transition: opacity 0.3s ease;
+}
+
+.navbar.collapsed .menu-text,
+.navbar.collapsed .brand-text {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.navbar.collapsed .navbar-header {
+  justify-content: center;
+}
+
+.navbar.collapsed .navbar-brand {
+  gap: 0;
+}
+
+.navbar.collapsed .menu-link {
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    width: 80px;
+  }
+
+  .navbar.collapsed {
+    width: 80px;
+  }
+
+  .navbar:not(.collapsed) {
+    width: 260px;
+  }
+
+  .brand-text,
+  .menu-text {
+    display: none;
+  }
+
+  .navbar:not(.collapsed) .brand-text,
+  .navbar:not(.collapsed) .menu-text {
+    display: block;
+    opacity: 1;
+  }
+}

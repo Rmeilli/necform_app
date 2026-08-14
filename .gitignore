@@ -1,0 +1,42 @@
+# Fichiers générés
+**/target/
+**/dist/
+**/build/
+**/node_modules/
+
+# Fichiers IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.classpath
+.project
+.settings/
+
+# Logs
+*.log
+hs_err_pid*.log
+replay_pid*.log
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Fichiers de secrets (ne jamais committer !)
+.env
+.env.local
+*.pem
+*.key
+*.secret
+*.p12
+*.jks
+
+# Fichiers de backup
+*~
+*.bak
+*.tmp
+
+# Documentation temporaire
+CI-CD-SETUP-SUMMARY.md
+TICKETS_GITHUB.md

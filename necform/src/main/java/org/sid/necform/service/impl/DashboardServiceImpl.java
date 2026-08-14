@@ -2,6 +2,7 @@ package org.sid.necform.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.sid.necform.dto.response.DashboardResponse;
+import org.sid.necform.entity.TypeUtilisateur;
 import org.sid.necform.repository.*;
 import org.sid.necform.service.DashboardService;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,10 @@ public class DashboardServiceImpl
                 sessionRepository.count(),
 
                 utilisateurRepository.count(),
+
+                utilisateurRepository.countByType(TypeUtilisateur.APPRENANT),
+
+                utilisateurRepository.countByType(TypeUtilisateur.FORMATEUR),
 
                 inscriptionRepository.count(),
 

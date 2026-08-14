@@ -1,5 +1,10 @@
 <div class="dashboard-container">
-  <h1 class="dashboard-title">Tableau de Bord</h1>
+  <div class="dashboard-header">
+    <div>
+      <h1 class="dashboard-title">{{ getWelcomeMessage() }}</h1>
+      <p class="dashboard-subtitle">{{ getRoleLabel() }}</p>
+    </div>
+  </div>
 
   <!-- Message d'erreur -->
   <div *ngIf="errorMessage" class="error-message">
@@ -12,9 +17,8 @@
     <p>Chargement des données...</p>
   </div>
 
-  <!-- Affichage des statistiques -->
-  <div *ngIf="!isLoading && dashboardData" class="stats-grid">
-    <!-- Carte Formations -->
+  <!-- ADMIN Dashboard -->
+  <div *ngIf="!isLoading && dashboardData && isAdmin()" class="stats-grid">
     <div class="stat-card">
       <div class="stat-icon formations">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -23,12 +27,11 @@
         </svg>
       </div>
       <div class="stat-content">
-        <h3>Formations</h3>
+        <h3>Total Formations</h3>
         <p class="stat-number">{{ dashboardData.formations }}</p>
       </div>
     </div>
 
-    <!-- Carte Sessions -->
     <div class="stat-card">
       <div class="stat-icon sessions">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -39,12 +42,24 @@
         </svg>
       </div>
       <div class="stat-content">
-        <h3>Sessions</h3>
+        <h3>Total Sessions</h3>
         <p class="stat-number">{{ dashboardData.sessions }}</p>
       </div>
     </div>
 
-    <!-- Carte Utilisateurs -->
+    <div class="stat-card">
+      <div class="stat-icon entreprises">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
+          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <h3>Total Entreprises</h3>
+        <p class="stat-number">{{ dashboardData.entreprises }}</p>
+      </div>
+    </div>
+
     <div class="stat-card">
       <div class="stat-icon utilisateurs">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -55,42 +70,60 @@
         </svg>
       </div>
       <div class="stat-content">
-        <h3>Utilisateurs</h3>
-        <p class="stat-number">{{ dashboardData.utilisateurs }}</p>
+        <h3>Total Apprenants</h3>
+        <p class="stat-number">{{ dashboardData.apprenants }}</p>
       </div>
     </div>
 
-    <!-- Carte Inscriptions -->
     <div class="stat-card">
-      <div class="stat-icon inscriptions">
+      <div class="stat-icon formateurs">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="8.5" cy="7" r="4"/>
-          <line x1="20" y1="8" x2="20" y2="14"/>
-          <line x1="23" y1="11" x2="17" y2="11"/>
+          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
         </svg>
       </div>
       <div class="stat-content">
-        <h3>Inscriptions</h3>
-        <p class="stat-number">{{ dashboardData.inscriptions }}</p>
+        <h3>Total Formateurs</h3>
+        <p class="stat-number">{{ dashboardData.formateurs }}</p>
       </div>
     </div>
+  </div>
 
-    <!-- Carte Entreprises -->
+  <!-- FORMATEUR Dashboard -->
+  <div *ngIf="!isLoading && isFormateur()" class="stats-grid">
     <div class="stat-card">
-      <div class="stat-icon entreprises">
+      <div class="stat-icon sessions">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
         </svg>
       </div>
       <div class="stat-content">
-        <h3>Entreprises</h3>
-        <p class="stat-number">{{ dashboardData.entreprises }}</p>
+        <h3>Mes Sessions</h3>
+        <p class="stat-number">{{ dashboardData?.sessions || 0 }}</p>
       </div>
     </div>
 
-    <!-- Carte Demandes -->
+    <div class="stat-card">
+      <div class="stat-icon utilisateurs">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <h3>Mes Apprenants</h3>
+        <p class="stat-number">{{ dashboardData?.inscriptions || 0 }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ENTREPRISE Dashboard -->
+  <div *ngIf="!isLoading && isEntreprise()" class="stats-grid">
     <div class="stat-card">
       <div class="stat-icon demandes">
         <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -102,8 +135,52 @@
         </svg>
       </div>
       <div class="stat-content">
-        <h3>Demandes</h3>
-        <p class="stat-number">{{ dashboardData.demandes }}</p>
+        <h3>Mes Demandes</h3>
+        <p class="stat-number">{{ dashboardData?.demandes || 0 }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon formations">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <h3>Mes Formations</h3>
+        <p class="stat-number">{{ dashboardData?.formations || 0 }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- APPRENANT Dashboard -->
+  <div *ngIf="!isLoading && isApprenant()" class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon formations">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <h3>Mes Formations</h3>
+        <p class="stat-number">{{ dashboardData?.inscriptions || 0 }}</p>
+      </div>
+    </div>
+
+    <div class="stat-card">
+      <div class="stat-icon sessions">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+      </div>
+      <div class="stat-content">
+        <h3>Calendrier</h3>
+        <p class="stat-number">{{ dashboardData?.sessions || 0 }}</p>
       </div>
     </div>
   </div>

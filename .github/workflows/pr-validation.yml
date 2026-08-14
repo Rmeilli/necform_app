@@ -1,0 +1,266 @@
+name: Pull Request Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+jobs:
+  pr-description-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Check PR description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prDescription = context.payload.pull_request.body || '';
+            
+            console.log('PR Description length:', prDescription.length);
+            
+            if (prDescription.length < 50) {
+              core.setFailed('❌ PR description is too short. Please provide a detailed description of your changes.');
+              return;
+            }
+            
+            console.log('✅ PR description is sufficient');
+
+      - name: Check PR title format
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prTitle = context.payload.pull_request.title;
+            
+            console.log('PR Title:', prTitle);
+            
+            // Check if PR title follows ticket format: NEC-XXX: description
+            if (!prTitle.match(/^NEC-\d+:/)) {
+              core.setFailed('❌ PR title must follow the format: NEC-XXX: description. Example: NEC-001: Create Apprenant entity');
+              return;
+            }
+            
+            // Extract ticket number
+            const ticketMatch = prTitle.match(/NEC-(\d+)/);
+            if (ticketMatch) {
+              const ticketNumber = parseInt(ticketMatch[1]);
+              console.log('Ticket number:', ticketNumber);
+              
+              // Check if ticket number is within valid range
+              if (ticketNumber < 1 || ticketNumber > 39) {
+                core.warning(`⚠️ Ticket number NEC-${ticketNumber} is outside expected range (NEC-001 to NEC-039)`);
+              }
+            }
+            
+            console.log('✅ PR title format is valid');
+
+      - name: Check for linked issues
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = context.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            
+            // Get linked issues
+            const linkedIssues = await github.rest.issues.listIssueComments({
+              owner,
+              repo,
+              issue_number: prNumber,
+            });
+            
+            // Check if PR body references a ticket
+            const prBody = context.payload.pull_request.body || '';
+            const ticketReferences = prBody.match(/NEC-\d+/g) || [];
+            
+            if (ticketReferences.length === 0) {
+              core.warning('⚠️ PR description does not reference any NEC tickets. Consider adding ticket references.');
+            } else {
+              console.log('✅ PR references tickets:', ticketReferences.join(', '));
+            }
+
+      - name: Check for breaking changes label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            
+            if (labels.includes('breaking-change')) {
+              core.warning('⚠️ This PR is marked as a breaking change. Ensure proper migration steps are documented.');
+            }
+
+      - name: Check for checklist in description
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prBody = context.payload.pull_request.body || '';
+            
+            // Check for common checklist items
+            const requiredItems = [
+              'Code follows project standards',
+              'Tests added/updated',
+              'Documentation updated'
+            ];
+            
+            const missingItems = requiredItems.filter(item => !prBody.includes(item));
+            
+            if (missingItems.length > 0) {
+              core.warning(`⚠️ PR description might be missing these checklist items: ${missingItems.join(', ')}`);
+            } else {
+              console.log('✅ PR description includes recommended checklist items');
+            }
+
+  file-changes-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for sensitive files
+        run: |
+          echo "🔍 Checking for sensitive files in changes..."
+          
+          # Get changed files
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }} origin/${{ github.head_ref }})
+          
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+          
+          # Check for sensitive file patterns
+          SENSITIVE_PATTERNS=(
+            "*.pem"
+            "*.key"
+            "*.secret"
+            "*.credentials"
+            "passwords.txt"
+            "secrets.yaml"
+            ".env.local"
+            "*.p12"
+            "*.jks"
+          )
+          
+          for pattern in "${SENSITIVE_PATTERNS[@]}"; do
+            if echo "$CHANGED_FILES" | grep -q "$pattern"; then
+              echo "❌ Warning: Files matching pattern '$pattern' were changed. Ensure no secrets are committed."
+              exit 1
+            fi
+          done
+          
+          echo "✅ No sensitive file patterns detected"
+
+      - name: Check for large files
+        run: |
+          echo "🔍 Checking for large files..."
+          
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }} origin/${{ github.head_ref }})
+          
+          for file in $CHANGED_FILES; do
+            if [ -f "$file" ]; then
+              SIZE=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null)
+              if [ "$SIZE" -gt 5242880 ]; then # 5MB
+                echo "⚠️  Warning: Large file detected: $file ($(du -h "$file" | cut -f1))"
+              fi
+            fi
+          done
+          
+          echo "✅ Large file check completed"
+
+      - name: Check file naming conventions
+        run: |
+          echo "🔍 Checking file naming conventions..."
+          
+          CHANGED_FILES=$(git diff --name-only origin/${{ github.base_ref }} origin/${{ github.head_ref }})
+          
+          for file in $CHANGED_FILES; do
+            # Check for spaces in filenames
+            if [[ "$file" =~ \  ]]; then
+              echo "❌ Error: Filename contains spaces: $file"
+              exit 1
+            fi
+            
+            # Check for proper Java file naming
+            if [[ "$file" =~ \.java$ ]]; then
+              filename=$(basename "$file" .java)
+              if [[ ! "$filename" =~ ^[A-Z][a-zA-Z0-9]*$ ]]; then
+                echo "⚠️  Warning: Java file doesn't follow PascalCase convention: $file"
+              fi
+            fi
+            
+            # Check for proper TypeScript file naming
+            if [[ "$file" =~ \.ts$ ]] || [[ "$file" =~ \.tsx$ ]]; then
+              filename=$(basename "$file" .ts)
+              filename=$(basename "$filename" .tsx)
+              if [[ ! "$filename" =~ ^[a-z][a-zA-Z0-9-]*$ ]]; then
+                echo "⚠️  Warning: TypeScript file doesn't follow kebab-case convention: $file"
+              fi
+            fi
+          done
+          
+          echo "✅ File naming conventions checked"
+
+  comprehensive-validation:
+    runs-on: ubuntu-latest
+    needs: [pr-description-check, file-changes-check]
+    if: always()
+    
+    steps:
+      - name: Validation summary
+        run: |
+          echo "🎯 Comprehensive PR Validation Summary"
+          echo ""
+          
+          # Check if all validations passed
+          if [ "${{ needs.pr-description-check.result }}" != "success" ]; then
+            echo "❌ PR description validation failed"
+            exit 1
+          fi
+          
+          if [ "${{ needs.file-changes-check.result }}" != "success" ]; then
+            echo "❌ File changes validation failed"
+            exit 1
+          fi
+          
+          echo "✅ All PR validations passed"
+          echo ""
+          echo "Summary:"
+          echo "- PR description: Valid"
+          echo "- PR title format: Valid"
+          echo "- Linked issues: Checked"
+          echo "- Sensitive files: None detected"
+          echo "- File naming: Valid"
+          echo "- Large files: Checked"
+
+      - name: Comment validation results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            let comment = '## ✅ PR Validation Results\n\n';
+            
+            comment += '### All Checks Passed\n';
+            comment += '- ✅ PR description format\n';
+            comment += '- ✅ PR title format (NEC-XXX: description)\n';
+            comment += '- ✅ Linked issues check\n';
+            comment += '- ✅ Sensitive files check\n';
+            comment += '- ✅ File naming conventions\n';
+            comment += '- ✅ Large files check\n\n';
+            
+            comment += '### 📋 Next Steps\n';
+            comment += '1. Wait for CI checks to complete\n';
+            comment += '2. Review code quality feedback\n';
+            comment += '3. Address any issues raised\n';
+            comment += '4. Request review from team members\n\n';
+            
+            comment += '---\n';
+            comment += '*This comment was automatically generated by GitHub Actions*';
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });

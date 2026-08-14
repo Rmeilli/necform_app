@@ -1,0 +1,30 @@
+<div class="formation-card" (click)="onClick()">
+  <div class="formation-header">
+    <div class="formation-icon" [style.background-color]="getCategoryColor()">
+      {{ getCategoryIcon() }}
+    </div>
+    <div class="formation-badge">{{ formation.categorie }}</div>
+  </div>
+  
+  <div class="formation-body">
+    <h3 class="formation-title">{{ formation.titre }}</h3>
+    <p class="formation-description">{{ formation.description }}</p>
+    
+    <div class="formation-meta">
+      <div class="meta-item">
+        <span class="meta-icon">⏱️</span>
+        <span class="meta-text">{{ formation.dureeHeures }}h</span>
+      </div>
+      <div class="meta-item">
+        <span class="meta-icon">💰</span>
+        <span class="meta-text">{{ formation.prix }} MAD</span>
+      </div>
+    </div>
+  </div>
+  
+  @if (showActions) {
+    <div class="formation-footer">
+      <button class="btn-view" (click)="$event.stopPropagation(); onClick()">Voir détails</button>
+    </div>
+  }
+</div>

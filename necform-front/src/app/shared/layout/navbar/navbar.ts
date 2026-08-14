@@ -1,9 +1,179 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { RoleService } from '../../../core/services/role.service';
+import { TypeUtilisateur } from '../../../shared/models/enums';
+
+interface MenuItem {
+  label: string;
+  icon: string;
+  path: string;
+  roles: TypeUtilisateur[];
+}
 
 @Component({
   selector: 'app-navbar',
-  imports: [],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './navbar.html',
   styleUrl: './navbar.css',
 })
-export class Navbar {}
+export class Navbar implements OnInit {
+  currentRole: TypeUtilisateur | null = null;
+  menuItems: MenuItem[] = [];
+  isCollapsed = false;
+
+  constructor(
+    private roleService: RoleService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.currentRole = this.roleService.getCurrentRole();
+    this.generateMenu();
+  }
+
+  private generateMenu(): void {
+    const allMenuItems: MenuItem[] = [
+      {
+        label: 'Dashboard',
+        icon: 'dashboard',
+        path: '/',
+        roles: [TypeUtilisateur.ADMIN, TypeUtilisateur.FORMATEUR, TypeUtilisateur.ENTREPRISE, TypeUtilisateur.APPRENANT]
+      },
+      {
+        label: 'Demandes',
+        icon: 'request',
+        path: '/demandes',
+        roles: [TypeUtilisateur.ADMIN, TypeUtilisateur.ENTREPRISE]
+      },
+      {
+        label: 'Entreprises',
+        icon: 'business',
+        path: '/entreprises',
+        roles: [TypeUtilisateur.ADMIN]
+      },
+      {
+        label: 'Formations',
+        icon: 'school',
+        path: '/formations',
+        roles: [TypeUtilisateur.ADMIN, TypeUtilisateur.ENTREPRISE, TypeUtilisateur.APPRENANT]
+      },
+      {
+        label: 'Sessions',
+        icon: 'calendar',
+        path: '/sessions',
+        roles: [TypeUtilisateur.ADMIN, TypeUtilisateur.FORMATEUR]
+      },
+      {
+        label: 'Inscriptions',
+        icon: 'people',
+        path: '/inscriptions',
+        roles: [TypeUtilisateur.ADMIN]
+      },
+      {
+        label: 'Utilisateurs',
+        icon: 'users',
+        path: '/utilisateurs',
+        roles: [TypeUtilisateur.ADMIN]
+      },
+      {
+        label: 'AI Assistant',
+        icon: 'smart_toy',
+        path: '/ai',
+        roles: [TypeUtilisateur.ADMIN, TypeUtilisateur.FORMATEUR, TypeUtilisateur.ENTREPRISE, TypeUtilisateur.APPRENANT]
+      },
+      {
+        label: 'Settings',
+        icon: 'settings',
+        path: '/settings',
+        roles: [TypeUtilisateur.ADMIN]
+      },
+      {
+        label: 'Mes Sessions',
+        icon: 'calendar',
+        path: '/mes-sessions',
+        roles: [TypeUtilisateur.FORMATEUR]
+      },
+      {
+        label: 'Mes Apprenants',
+        icon: 'people',
+        path: '/mes-apprenants',
+        roles: [TypeUtilisateur.FORMATEUR]
+      },
+      {
+        label: 'Calendrier',
+        icon: 'event',
+        path: '/calendrier',
+        roles: [TypeUtilisateur.FORMATEUR, TypeUtilisateur.APPRENANT]
+      },
+      {
+        label: 'Mon Profil',
+        icon: 'person',
+        path: '/profil',
+        roles: [TypeUtilisateur.FORMATEUR, TypeUtilisateur.ENTREPRISE, TypeUtilisateur.APPRENANT]
+      },
+      {
+        label: 'Catalogue',
+        icon: 'catalog',
+        path: '/catalogue',
+        roles: [TypeUtilisateur.ENTREPRISE]
+      },
+      {
+        label: 'Mes Demandes',
+        icon: 'request',
+        path: '/mes-demandes',
+        roles: [TypeUtilisateur.ENTREPRISE]
+      },
+      {
+        label: 'Mes Formations',
+        icon: 'school',
+        path: '/mes-formations',
+        roles: [TypeUtilisateur.ENTREPRISE, TypeUtilisateur.APPRENANT]
+      },
+      {
+        label: 'Mes Employés',
+        icon: 'work',
+        path: '/mes-employes',
+        roles: [TypeUtilisateur.ENTREPRISE]
+      },
+      {
+        label: 'Mes Documents',
+        icon: 'folder',
+        path: '/mes-documents',
+        roles: [TypeUtilisateur.APPRENANT]
+      }
+    ];
+
+    if (this.currentRole) {
+      this.menuItems = allMenuItems.filter(item => item.roles.includes(this.currentRole!));
+    }
+  }
+
+  toggleSidebar(): void {
+    this.isCollapsed = !this.isCollapsed;
+  }
+
+  isActive(path: string): boolean {
+    return this.router.url === path;
+  }
+
+  getIconSvg(icon: string): string {
+    const icons: { [key: string]: string } = {
+      dashboard: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>`,
+      request: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>`,
+      business: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`,
+      school: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>`,
+      calendar: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+      people: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+      users: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`,
+      smart_toy: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"></rect><circle cx="12" cy="5" r="2"></circle><path d="M12 7v4"></path><line x1="8" y1="16" x2="8" y2="16"></line><line x1="16" y1="16" x2="16" y2="16"></line></svg>`,
+      settings: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>`,
+      event: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+      person: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
+      catalog: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`,
+      work: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>`,
+      folder: `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>`
+    };
+    return icons[icon] || icons['dashboard'];
+  }
+}

@@ -1,6 +1,10 @@
 <div class="sessions-container">
-  <div class="header">
-    <h1>Sessions de Formation</h1>
+  <!-- Page Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Sessions de Formation</h1>
+      <p class="subtitle">Planifiez et gérez les sessions de formation.</p>
+    </div>
     <button class="btn-primary" (click)="showCreateForm()">+ Nouvelle Session</button>
   </div>
 
@@ -14,43 +18,139 @@
     <p>Chargement...</p>
   </div>
 
-  <div *ngIf="!isLoading" class="table-container">
-    <table class="sessions-table">
-      <thead>
-        <tr>
-          <th>Formation</th>
-          <th>Date Début</th>
-          <th>Date Fin</th>
-          <th>Lieu</th>
-          <th>Formateur</th>
-          <th>Statut</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let session of sessions">
-          <td>{{ session.formationTitre }}</td>
-          <td>{{ session.dateDebut | date:'dd/MM/yyyy' }}</td>
-          <td>{{ session.dateFin | date:'dd/MM/yyyy' }}</td>
-          <td>{{ session.lieu }}</td>
-          <td>{{ session.formateurNom }} {{ session.formateurPrenom }}</td>
-          <td>
-            <span class="statut-badge" [ngClass]="getStatutClass(session.statut)">
-              {{ getStatutLabel(session.statut) }}
-            </span>
-          </td>
-          <td class="actions">
-            <button class="btn-edit" (click)="showEditForm(session)">✏️</button>
-            <button class="btn-delete" (click)="deleteSession(session.id)">🗑️</button>
-          </td>
-        </tr>
-        <tr *ngIf="sessions.length === 0">
-          <td colspan="7" class="no-data">Aucune session trouvée</td>
-        </tr>
-      </tbody>
-    </table>
+  <div *ngIf="!isLoading">
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon total">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Total Sessions</p>
+          <p class="stat-value">{{ totalSessions }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon en-cours">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Sessions en cours</p>
+          <p class="stat-value">{{ sessionsEnCours }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon a-venir">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Sessions à venir</p>
+          <p class="stat-value">{{ sessionsAVenir }}</p>
+        </div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon terminees">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
+        </div>
+        <div class="stat-content">
+          <p class="stat-label">Sessions terminées</p>
+          <p class="stat-value">{{ sessionsTerminees }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Calendar -->
+    <div class="calendar-wrapper">
+      <div class="calendar-header">
+        <button class="btn-secondary" (click)="previousMonth()">←</button>
+        <h3>{{ getMonthName() }} {{ currentMonth.getFullYear() }}</h3>
+        <button class="btn-secondary" (click)="nextMonth()">→</button>
+      </div>
+      <div class="calendar-grid">
+        <div class="calendar-day-header">Dim</div>
+        <div class="calendar-day-header">Lun</div>
+        <div class="calendar-day-header">Mar</div>
+        <div class="calendar-day-header">Mer</div>
+        <div class="calendar-day-header">Jeu</div>
+        <div class="calendar-day-header">Ven</div>
+        <div class="calendar-day-header">Sam</div>
+        <div *ngFor="let day of calendarDays" 
+             class="calendar-day" 
+             [class.empty]="!day.day"
+             [class.today]="day.isToday"
+             (click)="day.date && selectDate(day.date)">
+          <span class="day-number" *ngIf="day.day">{{ day.day }}</span>
+          <div class="day-events" *ngIf="day.sessions && day.sessions.length > 0">
+            <div *ngFor="let session of day.sessions" 
+                 class="event-chip"
+                 [style.background-color]="getEventColor(session.statut)"
+                 (click)="$event.stopPropagation(); showEditForm(session)">
+              {{ session.formationTitre }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sessions Table -->
+    <div class="table-section">
+      <h2 class="section-title">Liste des sessions</h2>
+      <div class="table-container">
+        <table class="sessions-table">
+          <thead>
+            <tr>
+              <th>Formation</th>
+              <th>Date Début</th>
+              <th>Date Fin</th>
+              <th>Lieu</th>
+              <th>Formateur</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let session of sessions">
+              <td>{{ session.formationTitre }}</td>
+              <td>{{ session.dateDebut | date:'dd/MM/yyyy' }}</td>
+              <td>{{ session.dateFin | date:'dd/MM/yyyy' }}</td>
+              <td>{{ session.lieu }}</td>
+              <td>{{ session.formateurNom }} {{ session.formateurPrenom }}</td>
+              <td>
+                <span class="statut-badge" [ngClass]="getStatutClass(session.statut)">
+                  {{ getStatutLabel(session.statut) }}
+                </span>
+              </td>
+              <td class="actions">
+                <button class="btn-edit" (click)="showEditForm(session)">✏️</button>
+                <button class="btn-delete" (click)="deleteSession(session.id)">🗑️</button>
+              </td>
+            </tr>
+            <tr *ngIf="sessions.length === 0">
+              <td colspan="7" class="no-data">Aucune session trouvée</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
+  <!-- Modal Form -->
   <div *ngIf="showForm" class="modal-overlay" (click)="closeForm()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
@@ -80,12 +180,22 @@
           </select>
         </div>
         <div class="form-group">
-          <label>ID Formation *</label>
-          <input type="text" [(ngModel)]="formData.formationId" name="formationId" required placeholder="UUID">
+          <label>Formation *</label>
+          <select [(ngModel)]="formData.formationId" name="formationId" required>
+            <option value="">Sélectionner une formation</option>
+            <option *ngFor="let formation of formations" [value]="formation.id">
+              {{ formation.titre }}
+            </option>
+          </select>
         </div>
         <div class="form-group">
-          <label>ID Formateur *</label>
-          <input type="text" [(ngModel)]="formData.formateurId" name="formateurId" required placeholder="UUID">
+          <label>Formateur *</label>
+          <select [(ngModel)]="formData.formateurId" name="formateurId" required>
+            <option value="">Sélectionner un formateur</option>
+            <option *ngFor="let formateur of formateurs" [value]="formateur.id">
+              {{ formateur.prenom }} {{ formateur.nom }}
+            </option>
+          </select>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn-secondary" (click)="closeForm()">Annuler</button>

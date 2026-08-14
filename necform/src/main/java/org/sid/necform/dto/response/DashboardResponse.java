@@ -8,6 +8,10 @@ public record DashboardResponse(
 
         long utilisateurs,
 
+        long apprenants,
+
+        long formateurs,
+
         long inscriptions,
 
         long entreprises,

@@ -1,0 +1,142 @@
+version: '3.8'
+
+x-backend-variables: &backend-variables
+  SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-docker}
+  SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-necform}
+  SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-necform}
+  SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-necform}
+  EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka:8761/eureka
+  HUGGINGFACE_API_KEY: ${HUGGINGFACE_API_KEY:-}
+  GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+  GITHUB_TOKEN: ${GITHUB_TOKEN:-}
+
+services:
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    container_name: necform-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-necform}
+      POSTGRES_USER: ${POSTGRES_USER:-necform}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-necform}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - necform-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-necform} -d ${POSTGRES_DB:-necform}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Serveur Eureka (service discovery)
+  eureka:
+    build:
+      context: ./necform-eureka-server
+    container_name: necform-eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - necform-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Backend principal Spring Boot
+  backend:
+    build:
+      context: ./necform
+    container_name: necform-backend
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    environment:
+      <<: *backend-variables
+    depends_on:
+      postgres:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
+    networks:
+      - necform-network
+
+  # Gateway Spring Cloud
+  gateway:
+    build:
+      context: ./necform-gateway
+    container_name: necform-gateway
+    ports:
+      - "${GATEWAY_PORT:-8081}:8081"
+    environment:
+      <<: *backend-variables
+    depends_on:
+      eureka:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    networks:
+      - necform-network
+
+  # Service IA Spring Boot
+  ai-service:
+    build:
+      context: ./necform-ai-service
+    container_name: necform-ai-service
+    ports:
+      - "${AI_SERVICE_PORT:-8082}:8082"
+    environment:
+      <<: *backend-variables
+    depends_on:
+      eureka:
+        condition: service_healthy
+      backend:
+        condition: service_started
+    networks:
+      - necform-network
+
+  # Frontend Angular
+  frontend:
+    build:
+      context: ./necform-front
+      args:
+        - NODE_ENV=production
+    container_name: necform-frontend
+    ports:
+      - "${FRONTEND_PORT:-4200}:80"
+    depends_on:
+      - gateway
+    networks:
+      - necform-network
+
+  # (Optionnel) Serveur Keycloak - s'active avec: docker compose --profile auth up
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: necform-keycloak
+    command: start-dev --import-realm
+    profiles:
+      - auth
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:-admin}
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-necform}
+      KC_DB_USERNAME: ${POSTGRES_USER:-necform}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD:-necform}
+    ports:
+      - "${KEYCLOAK_PORT:-8180}:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - necform-network
+
+volumes:
+  postgres_data:
+
+networks:
+  necform-network:
+    driver: bridge

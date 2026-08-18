@@ -1,12 +1,15 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { FormationService } from '../../core/services/formation.service';
 import { Formation, CreateFormation } from '../../shared/models/formation.model';
+import { FormationCatalog } from '../../shared/components/formation-catalog/formation-catalog';
+import { FormationDetails } from '../../shared/components/formation-details/formation-details';
+import { RoleService } from '../../core/services/role.service';
 
 @Component({
   selector: 'app-formations',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, FormationCatalog, FormationDetails],
   templateUrl: './formations.html',
   styleUrl: './formations.css',
 })
@@ -25,12 +28,17 @@ export class Formations implements OnInit {
     prix: 0
   };
 
-  constructor(
-    private formationService: FormationService,
-    private cdr: ChangeDetectorRef
-  ) {}
+  private formationService = inject(FormationService);
+  private cdr = inject(ChangeDetectorRef);
+  private roleService = inject(RoleService);
+
+  viewMode: 'catalog' | 'admin' = 'catalog';
+  detailsFormation: Formation | null = null;
+  isAdmin = false;
 
   ngOnInit(): void {
+    this.isAdmin = this.roleService.isAdmin();
+    this.viewMode = this.isAdmin ? 'admin' : 'catalog';
     this.loadFormations();
   }
 
@@ -84,5 +92,17 @@ export class Formations implements OnInit {
         error: (error) => { console.error('Erreur:', error); this.errorMessage = 'Impossible de supprimer.'; }
       });
     }
+  }
+
+  switchView(mode: 'catalog' | 'admin'): void {
+    this.viewMode = mode;
+  }
+
+  showFormationDetails(formation: Formation | any): void {
+    this.detailsFormation = formation;
+  }
+
+  closeFormationDetails(): void {
+    this.detailsFormation = null;
   }
 }

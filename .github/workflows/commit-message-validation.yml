@@ -1,0 +1,82 @@
+name: Commit Message Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  validate-commit-messages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate commit messages
+        run: |
+          echo "Validating commit messages in PR #${{ github.event.pull_request.number }}"
+          
+          # Get the commit range for this PR
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+          
+          echo "Base SHA: $BASE_SHA"
+          echo "Head SHA: $HEAD_SHA"
+          
+          # Get all commits in this PR
+          COMMITS=$(git rev-list $BASE_SHA..$HEAD_SHA)
+          
+          if [ -z "$COMMITS" ]; then
+            echo "No commits found in this PR"
+            exit 0
+          fi
+          
+          echo "Found $(echo "$COMMITS" | wc -l) commit(s) to validate"
+          echo ""
+          
+          VALIDATION_FAILED=0
+          
+          for COMMIT in $COMMITS; do
+            MESSAGE=$(git log -1 --pretty=format:"%s" $COMMIT)
+            echo "Checking commit: $COMMIT"
+            echo "Message: $MESSAGE"
+            
+            # Validate commit message format: NEC-XXX: description
+            if [[ ! "$MESSAGE" =~ ^NEC-[0-9]+: ]]; then
+              echo "❌ Invalid commit message format"
+              echo "   Expected format: NEC-XXX: description"
+              echo "   Example: NEC-001: Create Apprenant entity"
+              VALIDATION_FAILED=1
+            else
+              echo "✅ Valid commit message format"
+              
+              # Extract ticket number
+              TICKET=$(echo "$MESSAGE" | grep -oP 'NEC-\K[0-9]+')
+              echo "   Ticket number: NEC-$TICKET"
+              
+              # Check if ticket number is within valid range (NEC-001 to NEC-039)
+              if [ "$TICKET" -lt 1 ] || [ "$TICKET" -gt 39 ]; then
+                echo "⚠️  Warning: Ticket number NEC-$TICKET is outside expected range (NEC-001 to NEC-039)"
+              fi
+            fi
+            
+            echo ""
+          done
+          
+          if [ $VALIDATION_FAILED -eq 1 ]; then
+            echo ""
+            echo "❌ Commit message validation failed!"
+            echo ""
+            echo "Please ensure all commit messages follow the format:"
+            echo "  NEC-XXX: Description of changes"
+            echo ""
+            echo "Examples:"
+            echo "  NEC-001: Create Apprenant entity with JPA annotations"
+            echo "  NEC-004: Implement apprenant list component"
+            echo "  NEC-018: Add document generation service"
+            exit 1
+          else
+            echo "✅ All commit messages are valid!"
+            exit 0
+          fi

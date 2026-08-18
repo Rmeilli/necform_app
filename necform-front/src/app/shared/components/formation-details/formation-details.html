@@ -1,0 +1,54 @@
+<div class="formation-details">
+  @if (showCloseButton) {
+    <button class="btn-close" (click)="onClose()">×</button>
+  }
+
+  <div class="details-header">
+    <div class="header-icon" [style.background-color]="getCategoryColor()">
+      {{ getCategoryIcon() }}
+    </div>
+    <div class="header-content">
+      <span class="category-badge">{{ formation.categorie }}</span>
+      <h1 class="formation-title">{{ formation.titre }}</h1>
+    </div>
+  </div>
+
+  <div class="details-body">
+    <div class="description-section">
+      <h2>Description</h2>
+      <p class="description">{{ formation.description }}</p>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <div class="info-icon">⏱️</div>
+        <div class="info-content">
+          <h3>Durée</h3>
+          <p>{{ formation.dureeHeures }} heures</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-icon">💰</div>
+        <div class="info-content">
+          <h3>Prix</h3>
+          <p>{{ formation.prix }} MAD</p>
+        </div>
+      </div>
+
+      <div class="info-card">
+        <div class="info-icon">📚</div>
+        <div class="info-content">
+          <h3>Catégorie</h3>
+          <p>{{ formation.categorie }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-section">
+      <button class="btn-enroll" (click)="onEnroll()">
+        S'inscrire à cette formation
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,62 @@
+name: Branch Name Validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [feature/*, hotfix/*, release/*]
+
+jobs:
+  validate-branch-name:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch name
+        run: |
+          BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
+          
+          # Extract branch name from refs/heads/ if present
+          BRANCH_NAME=$(echo "$BRANCH_NAME" | sed 's|refs/heads/||')
+          
+          echo "Validating branch name: $BRANCH_NAME"
+          
+          # Define allowed patterns
+          # feature/NEC-XXX-description
+          # hotfix/NEC-XXX-description  
+          # release/vX.X.X
+          # develop
+          # main
+          
+          if [[ "$BRANCH_NAME" == "develop" ]] || [[ "$BRANCH_NAME" == "main" ]]; then
+            echo "✅ Branch name '$BRANCH_NAME' is valid (main branch)"
+            exit 0
+          fi
+          
+          if [[ "$BRANCH_NAME" =~ ^feature/NEC-[0-9]+-.+$ ]]; then
+            echo "✅ Branch name '$BRANCH_NAME' is valid (feature branch)"
+            exit 0
+          fi
+          
+          if [[ "$BRANCH_NAME" =~ ^hotfix/NEC-[0-9]+-.+$ ]]; then
+            echo "✅ Branch name '$BRANCH_NAME' is valid (hotfix branch)"
+            exit 0
+          fi
+          
+          if [[ "$BRANCH_NAME" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "✅ Branch name '$BRANCH_NAME' is valid (release branch)"
+            exit 0
+          fi
+          
+          echo "❌ Branch name '$BRANCH_NAME' is invalid!"
+          echo ""
+          echo "Branch naming conventions:"
+          echo "  - feature/NEC-XXX-ticket-description"
+          echo "  - hotfix/NEC-XXX-ticket-description"
+          echo "  - release/vX.X.X"
+          echo "  - develop"
+          echo "  - main"
+          echo ""
+          echo "Examples:"
+          echo "  - feature/NEC-001-apprenant-entity-repository"
+          echo "  - hotfix/NEC-015-critical-security-fix"
+          echo "  - release/v1.0.0"
+          exit 1

@@ -1,0 +1,22 @@
+<div class="access-denied-container">
+  <div class="access-denied-content">
+    <div class="icon-wrapper">
+      <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="15" y1="9" x2="9" y2="15"></line>
+        <line x1="9" y1="9" x2="15" y2="15"></line>
+      </svg>
+    </div>
+    <h1>Accès Refusé</h1>
+    <p class="message">
+      Vous n'avez pas les permissions nécessaires pour accéder à cette page.
+    </p>
+    <p class="sub-message">
+      Si vous pensez qu'il s'agit d'une erreur, veuillez contacter votre administrateur.
+    </p>
+    <div class="actions">
+      <button class="btn-primary" (click)="goHome()">Retour à l'accueil</button>
+      <button class="btn-secondary" (click)="logout()">Se déconnecter</button>
+    </div>
+  </div>
+</div>

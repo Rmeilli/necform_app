@@ -1,1 +1,31 @@
-<p>navbar works!</p>
+<nav class="navbar" [class.collapsed]="isCollapsed">
+  <div class="navbar-header">
+    <div class="navbar-brand">
+      <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
+        <path d="M6 12v5c3 3 9 3 12 0v-5"/>
+      </svg>
+      <span class="brand-text" *ngIf="!isCollapsed">Necform</span>
+    </div>
+    <button class="toggle-btn" (click)="toggleSidebar()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <ul class="navbar-menu">
+    <li *ngFor="let item of menuItems" class="menu-item">
+      <a 
+        [routerLink]="item.path" 
+        routerLinkActive="active"
+        class="menu-link"
+        [class.active-link]="isActive(item.path)">
+        <span class="menu-icon" [innerHTML]="getIconSvg(item.icon)"></span>
+        <span class="menu-text" *ngIf="!isCollapsed">{{ item.label }}</span>
+      </a>
+    </li>
+  </ul>
+</nav>

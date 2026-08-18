@@ -1,10 +1,10 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DashboardService } from '../../core/services/dashboard.service';
+import { RoleService } from '../../core/services/role.service';
 import { DashboardStats } from '../../shared/models/dashboard.model';
+import { TypeUtilisateur } from '../../shared/models/enums';
 
-// Le composant Dashboard affiche les statistiques de l'application
-// OnInit est un lifecycle hook qui s'exécute quand le composant est initialisé
 @Component({
   selector: 'app-dashboard',
   imports: [CommonModule],
@@ -12,44 +12,38 @@ import { DashboardStats } from '../../shared/models/dashboard.model';
   styleUrl: './dashboard.css',
 })
 export class Dashboard implements OnInit {
-  // Variable pour stocker les données du dashboard
   dashboardData: DashboardStats | null = null;
-
-  // Variable pour gérer l'état de chargement
   isLoading = false;
-
-  // Variable pour gérer les erreurs
   errorMessage = '';
+  currentRole: TypeUtilisateur | null = null;
+  userName = '';
 
-  constructor(
-    private dashboardService: DashboardService,
-    private cdr: ChangeDetectorRef
-  ) {}
+  private dashboardService = inject(DashboardService);
+  private roleService = inject(RoleService);
+  private cdr = inject(ChangeDetectorRef);
 
-  // ngOnInit est appelé automatiquement par Angular après la création du composant
   ngOnInit(): void {
-    console.log('Dashboard component initialized');
+    console.log('Dashboard ngOnInit called');
+    this.currentRole = this.roleService.getCurrentRole();
+    console.log('Current role:', this.currentRole);
+    this.userName = this.roleService.getCurrentUserName();
+    console.log('User name:', this.userName);
     this.loadDashboardData();
   }
 
-  // Méthode pour charger les données du dashboard depuis l'API
   loadDashboardData(): void {
     console.log('Loading dashboard data...');
     this.isLoading = true;
     this.errorMessage = '';
     this.cdr.detectChanges();
 
-    // subscribe permet de s'abonner à l'Observable pour recevoir les données quand elles arrivent
     this.dashboardService.getDashboard().subscribe({
-      // next: callback appelé quand la requête réussit
       next: (data) => {
         console.log('Dashboard data received:', data);
         this.dashboardData = data;
         this.isLoading = false;
         this.cdr.detectChanges();
-        console.log('isLoading:', this.isLoading, 'dashboardData:', this.dashboardData);
       },
-      // error: callback appelé quand la requête échoue
       error: (error) => {
         console.error('Erreur lors du chargement du dashboard:', error);
         this.errorMessage = 'Impossible de charger les données du tableau de bord.';
@@ -57,5 +51,43 @@ export class Dashboard implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  isAdmin(): boolean {
+    return this.currentRole === TypeUtilisateur.ADMIN;
+  }
+
+  isFormateur(): boolean {
+    return this.currentRole === TypeUtilisateur.FORMATEUR;
+  }
+
+  isEntreprise(): boolean {
+    return this.currentRole === TypeUtilisateur.ENTREPRISE;
+  }
+
+  isApprenant(): boolean {
+    return this.currentRole === TypeUtilisateur.APPRENANT;
+  }
+
+  getWelcomeMessage(): string {
+    if (this.userName) {
+      return `Bienvenue, ${this.userName}`;
+    }
+    return 'Bienvenue';
+  }
+
+  getRoleLabel(): string {
+    switch (this.currentRole) {
+      case TypeUtilisateur.ADMIN:
+        return 'Administrateur';
+      case TypeUtilisateur.FORMATEUR:
+        return 'Formateur';
+      case TypeUtilisateur.ENTREPRISE:
+        return 'Entreprise';
+      case TypeUtilisateur.APPRENANT:
+        return 'Apprenant';
+      default:
+        return '';
+    }
   }
 }

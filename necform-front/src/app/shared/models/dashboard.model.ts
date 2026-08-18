@@ -4,6 +4,8 @@ export interface DashboardStats {
   formations: number;
   sessions: number;
   utilisateurs: number;
+  apprenants: number;
+  formateurs: number;
   inscriptions: number;
   entreprises: number;
   demandes: number;

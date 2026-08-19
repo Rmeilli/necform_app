@@ -1,187 +1,164 @@
-<div class="dashboard-container">
-  <div class="dashboard-header">
-    <div>
-      <h1 class="dashboard-title">{{ getWelcomeMessage() }}</h1>
-      <p class="dashboard-subtitle">{{ getRoleLabel() }}</p>
+<div class="dashboard-wrapper">
+  <!-- Header -->
+  <header class="dashboard-header">
+    <div class="header-content">
+      <div class="header-title">
+        <h1>{{ getWelcomeMessage() }}</h1>
+        <p class="role-badge">{{ getRoleLabel() }}</p>
+      </div>
+      <div class="header-date">
+        <i class="bi bi-calendar3"></i>
+        <span>{{ today | date:'EEEE d MMMM yyyy' }}</span>
+      </div>
     </div>
+  </header>
+
+  <!-- Error -->
+  <div *ngIf="errorMessage" class="dashboard-alert alert-error">
+    <i class="bi bi-exclamation-triangle-fill"></i>
+    <span>{{ errorMessage }}</span>
   </div>
 
-  <!-- Message d'erreur -->
-  <div *ngIf="errorMessage" class="error-message">
-    {{ errorMessage }}
-  </div>
-
-  <!-- Indicateur de chargement -->
-  <div *ngIf="isLoading" class="loading">
-    <div class="spinner"></div>
+  <!-- Loading -->
+  <div *ngIf="isLoading" class="dashboard-loading">
+    <div class="spinner-ring"></div>
     <p>Chargement des données...</p>
   </div>
 
   <!-- ADMIN Dashboard -->
-  <div *ngIf="!isLoading && dashboardData && isAdmin()" class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon formations">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-        </svg>
-      </div>
-      <div class="stat-content">
-        <h3>Total Formations</h3>
-        <p class="stat-number">{{ dashboardData.formations }}</p>
-      </div>
-    </div>
+  <ng-container *ngIf="!isLoading && dashboardData && isAdmin()">
+    <section class="dashboard-section">
+      <h2 class="section-title">Vue d'ensemble</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card blue">
+          <div class="kpi-icon"><i class="bi bi-journal-bookmark"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-label">Formations</span>
+            <span class="kpi-value">{{ dashboardData.formations }}</span>
+          </div>
+        </div>
 
-    <div class="stat-card">
-      <div class="stat-icon sessions">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-          <line x1="16" y1="2" x2="16" y2="6"/>
-          <line x1="8" y1="2" x2="8" y2="6"/>
-          <line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-      </div>
-      <div class="stat-content">
-        <h3>Total Sessions</h3>
-        <p class="stat-number">{{ dashboardData.sessions }}</p>
-      </div>
-    </div>
+        <div class="kpi-card green">
+          <div class="kpi-icon"><i class="bi bi-calendar-week"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-label">Sessions</span>
+            <span class="kpi-value">{{ dashboardData.sessions }}</span>
+          </div>
+        </div>
 
-    <div class="stat-card">
-      <div class="stat-icon entreprises">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/>
-          <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
-        </svg>
-      </div>
-      <div class="stat-content">
-        <h3>Total Entreprises</h3>
-        <p class="stat-number">{{ dashboardData.entreprises }}</p>
-      </div>
-    </div>
+        <div class="kpi-card purple">
+          <div class="kpi-icon"><i class="bi bi-building"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-label">Entreprises</span>
+            <span class="kpi-value">{{ dashboardData.entreprises }}</span>
+          </div>
+        </div>
 
-    <div class="stat-card">
-      <div class="stat-icon utilisateurs">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-      </div>
-      <div class="stat-content">
-        <h3>Total Apprenants</h3>
-        <p class="stat-number">{{ dashboardData.apprenants }}</p>
-      </div>
-    </div>
+        <div class="kpi-card amber">
+          <div class="kpi-icon"><i class="bi bi-people"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-label">Apprenants</span>
+            <span class="kpi-value">{{ dashboardData.apprenants }}</span>
+          </div>
+        </div>
 
-    <div class="stat-card">
-      <div class="stat-icon formateurs">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
-          <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
-        </svg>
+        <div class="kpi-card teal">
+          <div class="kpi-icon"><i class="bi bi-person-video3"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-label">Formateurs</span>
+            <span class="kpi-value">{{ dashboardData.formateurs }}</span>
+          </div>
+        </div>
       </div>
-      <div class="stat-content">
-        <h3>Total Formateurs</h3>
-        <p class="stat-number">{{ dashboardData.formateurs }}</p>
+    </section>
+
+    <section class="dashboard-section">
+      <h2 class="section-title">Activité</h2>
+      <div class="kpi-grid small">
+        <div class="kpi-card rose">
+          <div class="kpi-icon"><i class="bi bi-person-check"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-label">Inscriptions</span>
+            <span class="kpi-value">{{ dashboardData.inscriptions }}</span>
+          </div>
+        </div>
+        <div class="kpi-card red">
+          <div class="kpi-icon"><i class="bi bi-clipboard-check"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-label">Demandes</span>
+            <span class="kpi-value">{{ dashboardData.demandes }}</span>
+          </div>
+        </div>
       </div>
-    </div>
-  </div>
+    </section>
+  </ng-container>
 
   <!-- FORMATEUR Dashboard -->
-  <div *ngIf="!isLoading && isFormateur()" class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon sessions">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-          <line x1="16" y1="2" x2="16" y2="6"/>
-          <line x1="8" y1="2" x2="8" y2="6"/>
-          <line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
+  <ng-container *ngIf="!isLoading && isFormateur()">
+    <section class="dashboard-section">
+      <h2 class="section-title">Mes indicateurs</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card green">
+          <div class="kpi-icon"><i class="bi bi-calendar-week"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-label">Sessions à animer</span>
+            <span class="kpi-value">{{ dashboardData?.sessions || 0 }}</span>
+          </div>
+        </div>
+        <div class="kpi-card amber">
+          <div class="kpi-icon"><i class="bi bi-people"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-label">Apprenants inscrits</span>
+            <span class="kpi-value">{{ dashboardData?.inscriptions || 0 }}</span>
+          </div>
+        </div>
       </div>
-      <div class="stat-content">
-        <h3>Mes Sessions</h3>
-        <p class="stat-number">{{ dashboardData?.sessions || 0 }}</p>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon utilisateurs">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-          <circle cx="9" cy="7" r="4"/>
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-        </svg>
-      </div>
-      <div class="stat-content">
-        <h3>Mes Apprenants</h3>
-        <p class="stat-number">{{ dashboardData?.inscriptions || 0 }}</p>
-      </div>
-    </div>
-  </div>
+    </section>
+  </ng-container>
 
   <!-- ENTREPRISE Dashboard -->
-  <div *ngIf="!isLoading && isEntreprise()" class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon demandes">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-          <polyline points="14 2 14 8 20 8"/>
-          <line x1="16" y1="13" x2="8" y2="13"/>
-          <line x1="16" y1="17" x2="8" y2="17"/>
-          <polyline points="10 9 9 9 8 9"/>
-        </svg>
+  <ng-container *ngIf="!isLoading && isEntreprise()">
+    <section class="dashboard-section">
+      <h2 class="section-title">Mon espace entreprise</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card red">
+          <div class="kpi-icon"><i class="bi bi-clipboard-check"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-label">Demandes de formation</span>
+            <span class="kpi-value">{{ dashboardData?.demandes || 0 }}</span>
+          </div>
+        </div>
+        <div class="kpi-card blue">
+          <div class="kpi-icon"><i class="bi bi-journal-bookmark"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-label">Formations disponibles</span>
+            <span class="kpi-value">{{ dashboardData?.formations || 0 }}</span>
+          </div>
+        </div>
       </div>
-      <div class="stat-content">
-        <h3>Mes Demandes</h3>
-        <p class="stat-number">{{ dashboardData?.demandes || 0 }}</p>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon formations">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-        </svg>
-      </div>
-      <div class="stat-content">
-        <h3>Mes Formations</h3>
-        <p class="stat-number">{{ dashboardData?.formations || 0 }}</p>
-      </div>
-    </div>
-  </div>
+    </section>
+  </ng-container>
 
   <!-- APPRENANT Dashboard -->
-  <div *ngIf="!isLoading && isApprenant()" class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-icon formations">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 10v6M2 10l10-5 10 5-10 5z"/>
-          <path d="M6 12v5c3 3 9 3 12 0v-5"/>
-        </svg>
+  <ng-container *ngIf="!isLoading && isApprenant()">
+    <section class="dashboard-section">
+      <h2 class="section-title">Mon suivi</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card blue">
+          <div class="kpi-icon"><i class="bi bi-journal-bookmark"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-label">Mes inscriptions</span>
+            <span class="kpi-value">{{ dashboardData?.inscriptions || 0 }}</span>
+          </div>
+        </div>
+        <div class="kpi-card green">
+          <div class="kpi-icon"><i class="bi bi-calendar-week"></i></div>
+          <div class="kpi-body">
+            <span class="kpi-label">Sessions à venir</span>
+            <span class="kpi-value">{{ dashboardData?.sessions || 0 }}</span>
+          </div>
+        </div>
       </div>
-      <div class="stat-content">
-        <h3>Mes Formations</h3>
-        <p class="stat-number">{{ dashboardData?.inscriptions || 0 }}</p>
-      </div>
-    </div>
-
-    <div class="stat-card">
-      <div class="stat-icon sessions">
-        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-          <line x1="16" y1="2" x2="16" y2="6"/>
-          <line x1="8" y1="2" x2="8" y2="6"/>
-          <line x1="3" y1="10" x2="21" y2="10"/>
-        </svg>
-      </div>
-      <div class="stat-content">
-        <h3>Calendrier</h3>
-        <p class="stat-number">{{ dashboardData?.sessions || 0 }}</p>
-      </div>
-    </div>
-  </div>
+    </section>
+  </ng-container>
 </div>

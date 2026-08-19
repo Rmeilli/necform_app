@@ -17,6 +17,7 @@ export class Dashboard implements OnInit {
   errorMessage = '';
   currentRole: TypeUtilisateur | null = null;
   userName = '';
+  today = new Date();
 
   private dashboardService = inject(DashboardService);
   private roleService = inject(RoleService);

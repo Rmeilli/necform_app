@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface DocumentRepository
         extends JpaRepository<Document, UUID> {
+    java.util.List<Document> findByUtilisateurId(UUID utilisateurId);
 }

@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.sid.necform.dto.request.CreateUtilisateurRequest;
 import org.sid.necform.dto.request.UpdateUtilisateurRequest;
 import org.sid.necform.dto.response.UtilisateurResponse;
+import org.sid.necform.entity.Document;
 import org.sid.necform.entity.Inscription;
 import org.sid.necform.entity.SessionFormation;
 import org.sid.necform.entity.Utilisateur;
 import org.sid.necform.mapper.UtilisateurMapper;
+import org.sid.necform.repository.DocumentRepository;
 import org.sid.necform.repository.InscriptionRepository;
 import org.sid.necform.repository.SessionFormationRepository;
 import org.sid.necform.repository.UtilisateurRepository;
@@ -27,6 +29,7 @@ public class UtilisateurServiceImpl implements UtilisateurService {
     private final UtilisateurRepository utilisateurRepository;
     private final InscriptionRepository inscriptionRepository;
     private final SessionFormationRepository sessionFormationRepository;
+    private final DocumentRepository documentRepository;
 
     @Override
     public UtilisateurResponse create(CreateUtilisateurRequest request) {
@@ -108,6 +111,16 @@ public class UtilisateurServiceImpl implements UtilisateurService {
             System.out.println("Session ID: " + session.getId() + ", formateur après: null");
         }
         System.out.println("Sessions mises à jour");
+
+        // Mettre à null les documents liés à cet utilisateur
+        System.out.println("Recherche des documents pour l'utilisateur...");
+        List<Document> documents = documentRepository.findByUtilisateurId(id);
+        System.out.println("Documents trouvés: " + documents.size());
+        for (Document document : documents) {
+            document.setUtilisateur(null);
+            documentRepository.save(document);
+        }
+        System.out.println("Documents mis à jour");
 
         // Maintenant supprimer l'utilisateur
         System.out.println("Suppression de l'utilisateur...");

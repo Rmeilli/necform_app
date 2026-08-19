@@ -4,14 +4,16 @@ package org.sid.necform.config;
 import org.springframework.context.annotation.Bean; // Pour créer des beans gérés par Spring
 import org.springframework.context.annotation.Configuration; // Pour marquer cette classe comme configuration
 import org.springframework.core.convert.converter.Converter; // Pour convertir les JWT en tokens d'authentification
-import org.springframework.security.authentication.AbstractAuthenticationToken; // Classe de base pour les tokens
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity; // Pour activer la sécurité au niveau des méthodes
 import org.springframework.security.config.annotation.web.builders.HttpSecurity; // Pour configurer la sécurité HTTP
 import org.springframework.security.config.http.SessionCreationPolicy; // Pour définir la politique de session
 import org.springframework.security.oauth2.jwt.Jwt; // Classe représentant un token JWT
+import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter; // Filtre d'authentification JWT
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter; // Convertisseur JWT vers Authentication
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter; // Convertisseur pour les autorités (rôles)
 import org.springframework.security.web.SecurityFilterChain; // Chaîne de filtres de sécurité
+import org.sid.necform.repository.UtilisateurRepository; // Repository utilisateurs
+import org.sid.necform.security.KeycloakUserSyncFilter; // Filtre de synchronisation Keycloak
 import org.springframework.web.cors.CorsConfiguration; // Configuration CORS pour autoriser les requêtes cross-origin
 import org.springframework.web.cors.CorsConfigurationSource; // Source de configuration CORS
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource; // Implémentation basée sur les URLs
@@ -28,6 +30,12 @@ import java.util.stream.Stream; // Interface pour les streams
 @Configuration
 @EnableMethodSecurity
 public class SecurityConfig {
+
+    private final UtilisateurRepository utilisateurRepository;
+
+    public SecurityConfig(UtilisateurRepository utilisateurRepository) {
+        this.utilisateurRepository = utilisateurRepository;
+    }
 
     /**
      * Configure la chaîne de filtres de sécurité HTTP
@@ -84,7 +92,10 @@ public class SecurityConfig {
                         // Configure le convertisseur de JWT vers Authentication
                         // Ce convertisseur extrait les rôles du token Keycloak
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
-                );
+                )
+
+                // Ajoute le filtre de synchronisation Keycloak apres le filtre Bearer token
+                .addFilterAfter(new KeycloakUserSyncFilter(utilisateurRepository), BearerTokenAuthenticationFilter.class);
 
         // Construit et retourne la chaîne de filtres de sécurité
         return http.build();
